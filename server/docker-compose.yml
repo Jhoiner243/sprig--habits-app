@@ -6,17 +6,17 @@ services:
     container_name: sprig_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: sprig_db
+      POSTGRES_USER: sprig_user
+      POSTGRES_PASSWORD: change_this_secure_password
     ports:
-      - '${POSTGRES_PORT:-5432}:5432'
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - sprig_network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      test: ['CMD-SHELL', 'pg_isready -U sprig_user -d sprig_db']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
     container_name: sprig_redis
     restart: unless-stopped
     ports:
-      - '${REDIS_PORT:-6379}:6379'
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
