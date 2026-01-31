@@ -22,5 +22,25 @@ model Habit {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relationships
+  completions HabitCompletion[]
+
   @@map("habits")
+}
+
+model HabitCompletion {
+  id            Int      @id @default(autoincrement())
+  habitId       Int
+  completedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  // Relationships
+  habit         Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  // Indexes for better performance
+  @@index([habitId])
+  @@index([completedAt])
+  @@index([habitId, completedAt])
+  
+  @@map("habit_completions")
 }
