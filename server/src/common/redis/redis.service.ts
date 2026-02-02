@@ -3,11 +3,11 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Habit } from '../../habits/entities/habit.entity';
 import {
-  CacheInvalidationConfig,
-  REDIS_KEYS,
-  RedisLockOptions,
-  RedisMessage,
-  RedisSubscriber
+    CacheInvalidationConfig,
+    REDIS_KEYS,
+    RedisLockOptions,
+    RedisMessage,
+    RedisSubscriber
 } from './redis.types';
 
 @Injectable()
@@ -251,7 +251,7 @@ export class RedisService {
   /**
    * Get specific habit from cache
    */
-  async getHabit(id: number): Promise<Habit | null> {
+  async getHabit(id: string): Promise<Habit | null> {
     const keyConfig = REDIS_KEYS.HABITS.BY_ID(id);
     return this.get<Habit>(keyConfig.key);
   }
@@ -268,7 +268,7 @@ export class RedisService {
   /**
    * Get habits for specific user
    */
-  async getHabitsByUser(userId: number): Promise<Habit[] | null> {
+  async getHabitsByUser(userId: string): Promise<Habit[] | null> {
     const keyConfig = REDIS_KEYS.HABITS.BY_USER(userId);
     return this.get<Habit[]>(keyConfig.key);
   }
@@ -277,7 +277,7 @@ export class RedisService {
    * Set habits for specific user
    */
   async setHabitsByUser(
-    userId: number,
+    userId: string,
     habits: Habit[],
     ttl?: number,
   ): Promise<void> {

@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Habit {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(uuid())
   title       String
   description String?
   completed   Boolean  @default(false)
@@ -29,8 +29,8 @@ model Habit {
 }
 
 model HabitCompletion {
-  id            Int      @id @default(autoincrement())
-  habitId       Int
+  id            String      @id @default(uuid())
+  habitId       String
   completedAt   DateTime @default(now())
   createdAt     DateTime @default(now())
 

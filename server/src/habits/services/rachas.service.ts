@@ -7,14 +7,14 @@ import { HabitsRepository } from '../repositories/habits.repository';
  * Interfaces para el servicio de rachas
  */
 export interface StreakInfo {
-  habitId: number;
+  habitId: string;
   currentStreak: number;
   startDate: Date;
   endDate: Date;
 }
 
 export interface StreakStatistics {
-  habitId: number;
+  habitId: string;
   currentStreak: number;
   longestStreak: number;
   totalCompletions: number;
@@ -24,7 +24,7 @@ export interface StreakStatistics {
 }
 
 export interface HabitStreakSummary {
-  habitId: number;
+  habitId: string;
   habitTitle: string;
   currentStreak: number;
   longestStreak: number;
@@ -51,7 +51,7 @@ export class RachasService {
    * Obtiene la racha actual de un hábito
    * Una racha es activa si el hábito fue completado hoy o ayer
    */
-  async getCurrentStreak(habitId: number): Promise<StreakInfo> {
+  async getCurrentStreak(habitId: string): Promise<StreakInfo> {
     try {
       this.logger.debug(`Getting current streak for habit ${habitId}`);
 
@@ -91,7 +91,7 @@ export class RachasService {
   /**
    * Obtiene la racha más larga en el historial de un hábito
    */
-  async getLongestStreak(habitId: number): Promise<StreakInfo> {
+  async getLongestStreak(habitId: string): Promise<StreakInfo> {
     try {
       this.logger.debug(`Getting longest streak for habit ${habitId}`);
 
@@ -128,7 +128,7 @@ export class RachasService {
   /**
    * Obtiene estadísticas detalladas de rachas para un hábito
    */
-  async getStreakStatistics(habitId: number): Promise<StreakStatistics> {
+  async getStreakStatistics(habitId: string): Promise<StreakStatistics> {
     try {
       this.logger.debug(`Getting streak statistics for habit ${habitId}`);
 
@@ -190,7 +190,7 @@ export class RachasService {
   /**
    * Verifica si la racha está activa (completado hoy o ayer)
    */
-  async isStreakActive(habitId: number): Promise<boolean> {
+  async isStreakActive(habitId: string): Promise<boolean> {
     try {
       const completions = await this.getHabitCompletions(habitId, 2); // Solo necesitamos las últimas 2
 
@@ -266,7 +266,7 @@ export class RachasService {
    * Este método debe ser llamado cuando un hábito es marcado como completado
    */
   async recordHabitCompletion(
-    habitId: number,
+    habitId: string,
     completedAt?: Date,
   ): Promise<void> {
     try {
@@ -319,7 +319,7 @@ export class RachasService {
   /**
    * Elimina una completitud de hábito (deshacer)
    */
-  async removeHabitCompletion(habitId: number, date?: Date): Promise<void> {
+  async removeHabitCompletion(habitId: string, date?: Date): Promise<void> {
     try {
       const targetDate = date || new Date();
       const targetDay = this.getStartOfDay(targetDate);
@@ -357,9 +357,9 @@ export class RachasService {
    * Obtiene todas las completitudes de un hábito ordenadas por fecha descendente
    */
   private async getHabitCompletions(
-    habitId: number,
+    habitId: string,
     limit?: number,
-  ): Promise<Array<{ id: number; habitId: number; completedAt: Date }>> {
+  ): Promise<Array<{ id: string; habitId: string; completedAt: Date }>> {
     try {
       const model = (this.prisma as any).habitCompletion;
       const completions = await model.findMany({
@@ -382,7 +382,7 @@ export class RachasService {
    * Calcula la racha actual basándose en las completitudes
    */
   private calculateCurrentStreak(
-    habitId: number,
+    habitId: string,
     completions: Array<{ completedAt: Date }>,
   ): StreakInfo {
     if (completions.length === 0) {
@@ -444,7 +444,7 @@ export class RachasService {
    * Calcula la racha más larga en todo el historial
    */
   private calculateLongestStreak(
-    habitId: number,
+    habitId: string,
     completions: Array<{ completedAt: Date }>,
   ): StreakInfo {
     if (completions.length === 0) {
@@ -549,7 +549,7 @@ export class RachasService {
   /**
    * Invalida el cache relacionado con rachas de un hábito
    */
-  private async invalidateStreakCache(habitId: number): Promise<void> {
+  private async invalidateStreakCache(habitId: string): Promise<void> {
     try {
       await Promise.all([
         this.redis.del(`streak:current:${habitId}`),

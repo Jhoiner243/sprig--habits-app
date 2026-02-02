@@ -1,9 +1,8 @@
 import {
-  PaginationOptions,
-  PaginatedResult,
   CacheInvalidationConfig,
-  TransactionCallback,
-  PrismaTransaction,
+  PaginatedResult,
+  PaginationOptions,
+  TransactionCallback
 } from '../redis/redis.types';
 
 /**
@@ -21,7 +20,7 @@ export interface IRepository<T> {
   /**
    * Find entity by ID
    */
-  findOne(id: number): Promise<T | null>;
+  findOne(id: string): Promise<T | null>;
 
   /**
    * Find multiple entities with optional conditions
@@ -31,12 +30,12 @@ export interface IRepository<T> {
   /**
    * Update entity by ID
    */
-  update(id: number, data: Partial<T>): Promise<T>;
+  update(id: string, data: Partial<T>): Promise<T>;
 
   /**
    * Remove entity by ID
    */
-  remove(id: number): Promise<void>;
+  remove(id: string): Promise<void>;
 
   // ========== ADVANCED QUERY OPERATIONS ==========
 
@@ -75,12 +74,12 @@ export interface IRepository<T> {
   /**
    * Update multiple entities in batch
    */
-  batchUpdate(updates: { id: number; data: Partial<T> }[]): Promise<T[]>;
+  batchUpdate(updates: { id: string; data: Partial<T> }[]): Promise<T[]>;
 
   /**
    * Delete multiple entities in batch
    */
-  batchRemove(ids: number[]): Promise<void>;
+  batchRemove(ids: string[]): Promise<void>;
 
   // ========== CACHE OPERATIONS ==========
 
@@ -99,7 +98,7 @@ export interface IRepository<T> {
   /**
    * Get entity from cache or database
    */
-  getWithCache(id: number): Promise<T | null>;
+  getWithCache(id: string): Promise<T | null>;
 
   /**
    * Save entity to both database and cache
@@ -109,7 +108,7 @@ export interface IRepository<T> {
   /**
    * Delete entity from both database and cache
    */
-  removeWithCache(id: number): Promise<void>;
+  removeWithCache(id: string): Promise<void>;
 }
 
 /**
@@ -137,12 +136,12 @@ export interface IHabitsRepository extends IRepository<any> {
   /**
    * Mark habit as completed
    */
-  markCompleted(id: number): Promise<any>;
+  markCompleted(id: string): Promise<any>;
 
   /**
    * Mark habit as incomplete
    */
-  markIncomplete(id: number): Promise<any>;
+  markIncomplete(id: string): Promise<any>;
 
   /**
    * Get habit statistics
@@ -172,12 +171,12 @@ export interface IHabitsRepository extends IRepository<any> {
   /**
    * Mark multiple habits as completed
    */
-  markMultipleCompleted(ids: number[]): Promise<any[]>;
+  markMultipleCompleted(ids: string[]): Promise<any[]>;
 
   /**
    * Bulk update status for multiple habits
    */
-  bulkUpdateStatus(completed: boolean, ids: number[]): Promise<void>;
+  bulkUpdateStatus(completed: boolean, ids: string[]): Promise<void>;
 
   /**
    * Get habits created in last N days
