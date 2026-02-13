@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+  output     = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EnergyLevel {
+  SEED // 🌱 Mínimo: Para días caóticos
+  SPROUT // 🌿 Medio: Tu objetivo estándar  
+  FOREST // 🌲 Ideal: Para días con control total
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum MilestoneType {
+  TIME_DURATION // Focus on time-based milestones
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  habits      Habit[]
+  habitLogs   HabitLog[]
+  reflections Reflection[]
+
+  @@map("users")
+}
+
+model Habit {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  userId      String
+
+  // Energy levels with durations (in minutes)
+  seedDuration   Int? // Duration for Seed level
+  sproutDuration Int? // Duration for Sprout level  
+  forestDuration Int? // Duration for Forest level
+
+  // Scheduling
+  scheduledTime   String? // HH:MM format
+  scheduledDate   DateTime? // Specific date for one-time habits
+  frequency       Frequency @default(DAILY)
+  frequencyCustom String? // JSON string for custom frequency rules
+
+  // Status
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitLogs   HabitLog[]
+  milestones  HabitMilestone[]
+  reflections Reflection[]
+  completions HabitCompletion[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("habits")
+}
+
+model HabitLog {
+  id          String   @id @default(uuid())
+  habitId     String
+  userId      String
+  completedAt DateTime @default(now())
+
+  // Level completion tracking
+  completedLevel EnergyLevel
+
+  // Timer tracking
+  actualDuration Int? // Actual time spent in minutes
+
+  // Context
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  // Relationships
+  habit      Habit       @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reflection Reflection?
+
+  @@index([habitId])
+  @@index([userId])
+  @@index([completedAt])
+  @@index([habitId, userId, completedAt])
+  @@map("habit_logs")
+}
+
+model Milestone {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  type        MilestoneType @default(TIME_DURATION)
+  target      Float // Target value (e.g., minutes, hours)
+  current     Float         @default(0) // Current progress
+  unit        String? // e.g., "minutes", "hours"
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relationships
+  habits HabitMilestone[]
+
+  @@map("milestones")
+}
+
+model HabitMilestone {
+  id          String   @id @default(uuid())
+  habitId     String
+  milestoneId String
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  habit     Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, milestoneId])
+  @@index([habitId])
+  @@index([milestoneId])
+  @@map("habit_milestones")
+}
+
+model Reflection {
+  id         String @id @default(uuid())
+  habitId    String
+  habitLogId String @unique
+  userId     String
+
+  // User input
+  feeling String // How they feel after completion
+  mood    Int? // 1-5 scale mood rating
+  notes   String? // Additional thoughts
+
+  // AI-generated content
+  aiResponse String? // AI motivational message or insight
+  suggestion String? // AI suggestion for future
+
+  createdAt DateTime @default(now())
+
+  // Relationships
+  habit    Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habitLog HabitLog @relation(fields: [habitLogId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([habitLogId])
+  @@map("reflections")
+}
+
+// Keep for backward compatibility but mark as deprecated
+model HabitCompletion {
+  id          String   @id @default(uuid())
+  habitId     String
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  // Indexes for better performance
+  @@index([habitId])
+  @@index([completedAt])
+  @@index([habitId, completedAt])
+  @@map("habit_completions")
+}
