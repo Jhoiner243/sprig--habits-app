@@ -1,6 +1,6 @@
 export class HabitCompletion {
-  id: number;
-  habitId: number;
+  id: string;
+  habitId: string;
   completedAt: Date;
   createdAt: Date;
 }

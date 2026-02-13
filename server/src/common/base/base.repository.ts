@@ -2,18 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import {
-  IRepository,
-  IHabitsRepository,
-  IRepositoryFactory,
-} from './repository.interface';
-import {
-  PaginationOptions,
-  PaginatedResult,
   CacheInvalidationConfig,
-  TransactionCallback,
-  PrismaTransaction,
   CacheInvalidationType,
+  PaginatedResult,
+  PaginationOptions,
+  PrismaTransaction,
+  TransactionCallback,
 } from '../redis/redis.types';
+import {
+  IRepository
+} from './repository.interface';
 
 /**
  * Abstract base repository implementing IRepository interface
@@ -79,7 +77,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     }
   }
 
-  async findOne(id: number): Promise<T | null> {
+  async findOne(id: string): Promise<T | null> {
     try {
       // Try cache first
       const cacheKey = `${this.getCacheKeyPrefix()}:${id}`;
@@ -136,7 +134,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     }
   }
 
-  async update(id: number, data: Partial<T>): Promise<T> {
+  async update(id: string, data: Partial<T>): Promise<T> {
     try {
       const transformedData = this.transformBeforeSave(data);
       const model = this.getModel();
@@ -162,7 +160,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     try {
       const model = this.getModel();
       await model.delete({
@@ -306,7 +304,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     return results;
   }
 
-  async batchUpdate(updates: { id: number; data: Partial<T> }[]): Promise<T[]> {
+  async batchUpdate(updates: { id: string; data: Partial<T> }[]): Promise<T[]> {
     const results: T[] = [];
 
     for (const { id, data } of updates) {
@@ -317,7 +315,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     return results;
   }
 
-  async batchRemove(ids: number[]): Promise<void> {
+  async batchRemove(ids: string[]): Promise<void> {
     for (const id of ids) {
       await this.remove(id);
     }
@@ -341,7 +339,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
 
   // ========== UTILITY METHODS ==========
 
-  async getWithCache(id: number): Promise<T | null> {
+  async getWithCache(id: string): Promise<T | null> {
     return this.findOne(id);
   }
 
@@ -350,7 +348,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     return this.update(id, entity);
   }
 
-  async removeWithCache(id: number): Promise<void> {
+  async removeWithCache(id: string): Promise<void> {
     await this.remove(id);
   }
 

@@ -1,4 +1,3 @@
-import { Cache } from 'cache-manager';
 
 // Tipos base para Redis operations
 export interface RedisKeyConfig {
@@ -45,12 +44,12 @@ export interface HabitCacheConfig {
 export const REDIS_KEYS = {
   HABITS: {
     ALL: { prefix: 'habits:all', ttl: 300 }, // 5 minutes
-    BY_ID: (id: number) => ({ key: `habits:${id}`, ttl: 300 }),
-    BY_USER: (userId: number) => ({ key: `habits:user:${userId}`, ttl: 600 }), // 10 minutes
+    BY_ID: (id: string) => ({ key: `habits:${id}`, ttl: 300 }),
+    BY_USER: (userId: string) => ({ key: `habits:user:${userId}`, ttl: 600 }), // 10 minutes
     STATS: { prefix: 'habits:stats', ttl: 900 }, // 15 minutes
   },
   LOCKS: {
-    HABIT_UPDATE: (id: number) => `locks:habit:update:${id}`,
+    HABIT_UPDATE: (id: string) => `locks:habit:update:${id}`,
     HABIT_CREATE: 'locks:habit:create',
   },
   PUBSUB: {
@@ -78,8 +77,8 @@ export enum CacheInvalidationType {
 export interface CacheInvalidationConfig {
   type: CacheInvalidationType;
   patterns?: string[];
-  userId?: number;
-  entityId?: number;
+  userId?: string;
+  entityId?: string;
 }
 
 // Tipos para Pub/Sub
@@ -87,8 +86,8 @@ export interface RedisMessage {
   type: string;
   data: any;
   timestamp: number;
-  entityId?: number;
-  userId?: number;
+  entityId?: string;
+  userId?: string;
 }
 
 export type RedisSubscriber = RedisSubscriptionCallback;
