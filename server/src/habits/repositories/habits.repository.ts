@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { RedisService } from '../../common/redis/redis.service';
 import { BaseRepository } from '../../common/base/base.repository';
 import { IHabitsRepository } from '../../common/base/repository.interface';
-import { Habit } from '../entities/habit.entity';
+import { RedisService } from '../../common/redis/redis.service';
 import { CacheInvalidationType } from '../../common/redis/redis.types';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Habit } from '../entities/habit.entity';
 
 /**
  * Specific repository for Habit entity
@@ -91,7 +91,7 @@ export class HabitsRepository
     }
   }
 
-  async markCompleted(id: number): Promise<Habit> {
+  async markCompleted(id: string): Promise<Habit> {
     try {
       const lockKey = `habit:complete:${id}`;
       const lock = await this.redis.acquireLock(lockKey, { ttl: 30 });
@@ -129,7 +129,7 @@ export class HabitsRepository
     }
   }
 
-  async markIncomplete(id: number): Promise<Habit> {
+  async markIncomplete(id: string): Promise<Habit> {
     try {
       const habit = await this.getModel().update({
         where: { id },
@@ -267,7 +267,7 @@ export class HabitsRepository
     }
   }
 
-  async markMultipleCompleted(ids: number[]): Promise<Habit[]> {
+  async markMultipleCompleted(ids: string[]): Promise<Habit[]> {
     try {
       const lockKey = 'habits:batch:complete';
       const lock = await this.redis.acquireLock(lockKey, { ttl: 60 });
@@ -310,7 +310,7 @@ export class HabitsRepository
     }
   }
 
-  async bulkUpdateStatus(completed: boolean, ids: number[]): Promise<void> {
+  async bulkUpdateStatus(completed: boolean, ids: string[]): Promise<void> {
     try {
       await this.getModel().updateMany({
         where: { id: { in: ids } },
